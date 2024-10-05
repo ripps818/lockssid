@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Source the configuration file
+CONF_FILE="$HOME/.config/LockSSID/lockssid.conf"
+if [ -f "$CONF_FILE" ]; then
+    source "$CONF_FILE"
+else
+    echo "Error: Configuration file not found at $CONF_FILE"
+    exit 1
+fi
+
 # Function to log messages
 log_message() {
     local message="$1"
