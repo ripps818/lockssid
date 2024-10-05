@@ -12,7 +12,7 @@ fi
 # Function to log messages
 log_message() {
     local message="$1"
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - $message" >> "$LOG_FILE"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $message" >> "$log_file"
 }
 
 # Function to check if Wi-Fi is locked
