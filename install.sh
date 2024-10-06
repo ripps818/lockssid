@@ -10,7 +10,7 @@ mkdir -p "$CONF_DIR" && echo "Config directory created: $CONF_DIR"
 mkdir -p "$SYSTEMD_DIR" && echo "Config directory created: $SYSTEMD_DIR"
 
 # Check if the config file already exists
-if [[ -f "$CONF_FILE" ]]; then
+if [[ -f "$CONF_DIR/lockssid.conf" ]]; then
     read -p "Configuration file already exists. Do you want to overwrite it? (y/n): " overwrite
     if [[ "$overwrite" != "y" ]]; then
         echo "Skipping configuration file overwrite."
