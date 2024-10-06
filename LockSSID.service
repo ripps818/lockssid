@@ -1,9 +1,9 @@
 [Unit]
-Description=Lock Wi-Fi SSID when specified programs are running
+Description=Lock WiFi to specific SSIDs based on running programs
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/bash "$HOME/.local/share/LockSSID/monitor-wifi-lock.sh"
+ExecStart=%h/.local/share/LockSSID/monitor-wifi-lock.sh
 Restart=on-failure
 
 [Install]
