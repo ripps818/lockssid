@@ -9,12 +9,25 @@ mkdir -p "$INSTALL_DIR" && echo "Install directory created: $INSTALL_DIR"
 mkdir -p "$CONF_DIR" && echo "Config directory created: $CONF_DIR"
 mkdir -p "$SYSTEMD_DIR" && echo "Config directory created: $SYSTEMD_DIR"
 
-# Install LockSSID scripts and configuration
+# Check if the config file already exists
+if [[ -f "$CONF_FILE" ]]; then
+    read -p "Configuration file already exists. Do you want to overwrite it? (y/n): " overwrite
+    if [[ "$overwrite" != "y" ]]; then
+        echo "Skipping configuration file overwrite."
+    else
+        echo "Overwriting configuration file."
+        install -m 644 lockssid.conf "$CONF_DIR/"
+    fi
+else
+    echo "Installing configuration file."
+    install -m 644 lockssid.conf "$CONF_DIR/"
+fi
+
+# Install LockSSID scripts
 install -m 755 lock-wifi.sh unlock-wifi.sh monitor-wifi-lock.sh utils.sh "$INSTALL_DIR/"
-install -m 644 lockssid.conf "$CONF_DIR/"
 
 # Install the systemd service file
-install -m 644 LockSSID.service ~/.config/systemd/user/
+install -m 644 LockSSID.service "$SYSTEMD_DIR/"
 if [ ! -f "$SYSTEMD_DIR/LockSSID.service" ]; then
   echo "Error: $SYSTEMD_DIR/LockSSID.service not found."
   exit 1
