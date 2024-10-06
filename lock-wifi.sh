@@ -11,6 +11,13 @@ for SSID in "${ssids[@]}"; do
     # Get the BSSID based on the SSID
     BSSID=$(get_bssid_from_ssid "$SSID")
 
+    if [[ -n "$BSSID" ]]; then
+        # Proceed with locking or unlocking Wi-Fi
+        log_message "Using BSSID $BSSID for SSID $SSID."
+    else
+        log_message "Failed to retrieve BSSID for SSID $SSID."
+    fi
+
     if [ -n "$BSSID" ]; then
         # Lock Wi-Fi to the specified BSSID
         nmcli con mod "$SSID" 802-11-wireless.bssid "$BSSID"
