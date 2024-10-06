@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load utility functions
-source ~/.local/share/LockSSID/utils.sh
+source "$HOME/.local/share/LockSSID/utils.sh"
 
 # Get the current SSID
 SSID=$(get_current_ssid)
