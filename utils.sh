@@ -15,40 +15,49 @@ log_message() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $message" >> "$log_file"
 }
 
+# Function to get the active Wi-Fi device
+get_active_wifi_device() {
+    nmcli -t -f DEVICE,TYPE device | grep ':wifi' | cut -d':' -f1 | head -n1
+}
+
+# Function to get the current SSID
+get_current_ssid() {
+    local wifi_device
+    wifi_device=$(get_active_wifi_device)
+
+    if [ -n "$wifi_device" ]; then
+        nmcli device wifi list ifname "$wifi_device" | grep -m 1 '*' | awk '{print $3}'
+    else
+        log_message "No active Wi-Fi device found."
+        return 1
+    fi
+}
+
+# Function to get the current BSSID
+get_current_bssid() {
+    local wifi_device
+    wifi_device=$(get_active_wifi_device)
+
+    if [ -n "$wifi_device" ]; then
+        nmcli device wifi list ifname "$wifi_device" | grep -m 1 '*' | awk '{print $2}'
+    else
+        log_message "No active Wi-Fi device found."
+        return 1
+    fi
+}
+
 # Function to check if Wi-Fi is locked
 is_wifi_locked() {
+    local ssid
     local bssid
-    bssid=$(nmcli -f 802-11-wireless.bssid con show "$SSID" | tail -n1)
-    [ -n "$bssid" ] && [ "$bssid" != "" ]  # Return true if BSSID is set
-}
-
-# Function to get BSSID from SSID
-get_bssid_from_ssid() {
-    local target_ssid="$1"
-    
-    # Find the active Wi-Fi device (exclude p2p-dev and disconnected devices)
-    WIFI_DEVICE=$(nmcli device status | grep wifi | grep -v 'p2p-dev' | grep -v 'disconnected' | awk '{print $1}' | head -n 1)
-
-    if [[ -z "$WIFI_DEVICE" ]]; then
-        echo "No active Wi-Fi device found." >&2
-        return 1
-    fi
-
-    # Get connection details for the Wi-Fi device
-    LINK_INFO=$(iw dev "$WIFI_DEVICE" link)
-    SSID=$(echo "$LINK_INFO" | grep 'SSID' | awk '{print $2}')
-    
-    # Check if the current SSID matches the one from the config file
-    if [[ "$SSID" == "$target_ssid" ]]; then
-        BSSID=$(echo "$LINK_INFO" | grep 'Connected to' | awk '{print $3}')
-        echo "$BSSID"
+    ssid=$(get_current_ssid)
+    bssid=$(nmcli con show "$ssid" | grep -m1 802-11-wireless.bssid: | awk '{print $2}')
+    if [ "$bssid" == "--" ]; then
         return 0
     else
-        echo "SSID $target_ssid not currently connected." >&2
-        return 1
+       return 1
     fi
 }
-
 
 # Function to check running programs
 check_running_programs() {

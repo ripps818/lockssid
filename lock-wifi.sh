@@ -1,33 +1,27 @@
 #!/bin/bash
 
 # Load utility functions
-source "$HOME/.local/share/LockSSID/utils.sh"
+source ~/.local/share/LockSSID/utils.sh
 
-# Load configuration file
-source "$HOME/.config/LockSSID/lockssid.conf"
+# Get the current SSID
+SSID=$(get_current_ssid)
 
-# Loop through SSIDs in the config
-for SSID in "${ssids[@]}"; do
-    # Get the BSSID based on the SSID
-    BSSID=$(get_bssid_from_ssid "$SSID")
+if [ -z "$SSID" ]; then
+    log_message "No active Wi-Fi connection found. Exiting."
+    exit 1
+fi
 
-    if [[ -n "$BSSID" ]]; then
-        # Proceed with locking or unlocking Wi-Fi
-        log_message "Using BSSID $BSSID for SSID $SSID."
-    else
-        log_message "Failed to retrieve BSSID for SSID $SSID."
-    fi
+# Locking logic
+log_message "Locking Wi-Fi for SSID: $SSID"
+bssid=$(get_current_bssid)
 
-    if [ -n "$BSSID" ]; then
-        # Lock Wi-Fi to the specified BSSID
-        nmcli con mod "$SSID" 802-11-wireless.bssid "$BSSID"
+if [ -n "$bssid" ]; then
+    nmcli con mod "$SSID" 802-11-wireless.bssid "$bssid"
+    log_message "Wi-Fi locked to BSSID: $bssid"
+else
+    log_message "Failed to retrieve BSSID for SSID: $SSID"
+fi
 
-        # Log success and break out of the loop
-        log_message "Locked Wi-Fi to SSID: $SSID and BSSID: $BSSID"
-        send_notification "Locked to SSID: $SSID" "Wi-Fi Lock"
-        break
-    else
-        # Log the failure and continue to the next SSID
-        log_message "Failed to lock Wi-Fi to SSID: $SSID"
-    fi
-done
+# Optionally disconnect and reconnect
+nmcli device disconnect "$SSID"
+nmcli device connect "$SSID"
