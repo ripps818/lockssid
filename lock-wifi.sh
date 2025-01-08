@@ -22,11 +22,12 @@ if [ -z "$DEVICE_NAME" ]; then
     exit 1
 fi
 
-# Locking logic with additional logging
+# Locking logic with additional logging and validation
 log_message "Attempting to lock Wi-Fi for SSID: $SSID"
-bssid=$(nmcli -t -f ACTIVE,BSSID dev wifi | grep '^yes:' | cut -d':' -f2)
+bssid=$(nmcli -t -f ACTIVE,BSSID dev wifi | grep '^yes:' | cut -d':' -f2-)
 
 if [ -n "$bssid" ]; then
+    bssid=$(echo "$bssid" | sed 's/\\:/:/g')
     log_message "Current BSSID for SSID $SSID: $bssid"
     nmcli con mod "$SSID" 802-11-wireless.bssid "$bssid"
     log_message "Wi-Fi locked to BSSID: $bssid"
@@ -43,8 +44,12 @@ log_message "Set NetworkManager to unmanaged for device: $DEVICE_NAME"
 iw dev "$DEVICE_NAME" set power_save off
 log_message "Turned off power saving mode for device: $DEVICE_NAME"
 
-# Optionally disconnect and reconnect
-log_message "Disconnecting and reconnecting device: $DEVICE_NAME"
-nmcli device disconnect "$DEVICE_NAME"
-nmcli device connect "$DEVICE_NAME"
-log_message "Reconnected device: $DEVICE_NAME"
+# Disconnect and reconnect if the device is active
+if nmcli device status | grep -q "$DEVICE_NAME.*connected"; then
+    log_message "Disconnecting and reconnecting device: $DEVICE_NAME"
+    nmcli device disconnect "$DEVICE_NAME"
+    nmcli device connect "$DEVICE_NAME"
+    log_message "Reconnected device: $DEVICE_NAME"
+else
+    log_message "Device $DEVICE_NAME is not active. Skipping disconnect and reconnect."
+fi

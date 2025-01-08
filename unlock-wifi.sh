@@ -35,8 +35,12 @@ log_message "Set NetworkManager to managed for device: $DEVICE_NAME"
 iw dev "$DEVICE_NAME" set power_save on
 log_message "Turned on power saving mode for device: $DEVICE_NAME"
 
-# Optionally disconnect and reconnect
-log_message "Disconnecting and reconnecting device: $DEVICE_NAME"
-nmcli device disconnect "$DEVICE_NAME"
-nmcli device connect "$DEVICE_NAME"
-log_message "Reconnected device: $DEVICE_NAME"
+# Disconnect and reconnect if the device is active
+if nmcli device status | grep -q "$DEVICE_NAME.*connected"; then
+    log_message "Disconnecting and reconnecting device: $DEVICE_NAME"
+    nmcli device disconnect "$DEVICE_NAME"
+    nmcli device connect "$DEVICE_NAME"
+    log_message "Reconnected device: $DEVICE_NAME"
+else
+    log_message "Device $DEVICE_NAME is not active. Skipping disconnect and reconnect."
+fi
