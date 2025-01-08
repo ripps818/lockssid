@@ -27,13 +27,9 @@ log_message "Unlocking Wi-Fi for SSID: $SSID"
 nmcli con mod "$SSID" 802-11-wireless.bssid ''
 log_message "Cleared BSSID lock for SSID: $SSID"
 
-# Re-enable NetworkManager scanning for other networks
-nmcli dev set "$DEVICE_NAME" managed yes
-log_message "Set NetworkManager to managed for device: $DEVICE_NAME"
-
-# Turn on power saving mode
-iw dev "$DEVICE_NAME" set power_save on
-log_message "Turned on power saving mode for device: $DEVICE_NAME"
+# Turn on power saving mode using nmcli
+nmcli con mod "$SSID" 802-11-wireless.powersave 3
+log_message "Turned on power saving mode for SSID: $SSID"
 
 # Disconnect and reconnect if the device is active
 if nmcli device status | grep -q "$DEVICE_NAME.*connected"; then

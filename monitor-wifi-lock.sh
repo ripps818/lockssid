@@ -29,6 +29,9 @@ check_running_programs() {
     return 1
 }
 
+# Set card to unlocked when we first start.
+bash $unlock_wifi
+
 # Function to monitor Wi-Fi status
 monitor_wifi() {
     local current_ssid

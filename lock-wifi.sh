@@ -24,10 +24,9 @@ fi
 
 # Locking logic with additional logging and validation
 log_message "Attempting to lock Wi-Fi for SSID: $SSID"
-bssid=$(nmcli -t -f ACTIVE,BSSID dev wifi | grep '^yes:' | cut -d':' -f2-)
+bssid=$(nmcli -t -f ACTIVE,BSSID dev wifi | grep '^yes:' | cut -d':' -f2- | sed 's/\\:/:/g')
 
 if [ -n "$bssid" ]; then
-    bssid=$(echo "$bssid" | sed 's/\\:/:/g')
     log_message "Current BSSID for SSID $SSID: $bssid"
     nmcli con mod "$SSID" 802-11-wireless.bssid "$bssid"
     log_message "Wi-Fi locked to BSSID: $bssid"
@@ -40,9 +39,9 @@ fi
 nmcli dev set "$DEVICE_NAME" managed no
 log_message "Set NetworkManager to unmanaged for device: $DEVICE_NAME"
 
-# Turn off power saving mode
-iw dev "$DEVICE_NAME" set power_save off
-log_message "Turned off power saving mode for device: $DEVICE_NAME"
+# Turn off power saving mode using nmcli
+nmcli con mod "$SSID" 802-11-wireless.powersave 2
+log_message "Turned off power saving mode for SSID: $SSID"
 
 # Disconnect and reconnect if the device is active
 if nmcli device status | grep -q "$DEVICE_NAME.*connected"; then
