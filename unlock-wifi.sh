@@ -22,16 +22,21 @@ if [ -z "$DEVICE_NAME" ]; then
     exit 1
 fi
 
-# Unlocking logic
+# Unlocking logic with additional logging
 log_message "Unlocking Wi-Fi for SSID: $SSID"
 nmcli con mod "$SSID" 802-11-wireless.bssid ''
+log_message "Cleared BSSID lock for SSID: $SSID"
 
 # Re-enable NetworkManager scanning for other networks
 nmcli dev set "$DEVICE_NAME" managed yes
+log_message "Set NetworkManager to managed for device: $DEVICE_NAME"
 
 # Turn on power saving mode
 iw dev "$DEVICE_NAME" set power_save on
+log_message "Turned on power saving mode for device: $DEVICE_NAME"
 
 # Optionally disconnect and reconnect
+log_message "Disconnecting and reconnecting device: $DEVICE_NAME"
 nmcli device disconnect "$DEVICE_NAME"
 nmcli device connect "$DEVICE_NAME"
+log_message "Reconnected device: $DEVICE_NAME"
