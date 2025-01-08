@@ -3,6 +3,7 @@
 # Variables
 INSTALL_DIR="/etc/lockssid"
 SYSTEMD_DIR="/etc/systemd/system"
+USER_SYSTEMD_DIR="$HOME/.config/systemd/user"
 SERVICE_FILE="lockssid.service"
 OLD_INSTALL_DIR="$HOME/.local/share/LockSSID"
 OLD_CONF_DIR="$HOME/.config/LockSSID"
@@ -25,11 +26,11 @@ remove_old_configs() {
     if [ -d "$OLD_CONF_DIR" ]; then
         rm -rf "$OLD_CONF_DIR" && echo "Old config directory removed: $OLD_CONF_DIR"
     fi
-    if [ -f "$SYSTEMD_DIR/$OLD_SERVICE_FILE" ]; then
-        sudo systemctl stop "$OLD_SERVICE_FILE"
-        sudo systemctl disable "$OLD_SERVICE_FILE"
-        sudo rm -f "$SYSTEMD_DIR/$OLD_SERVICE_FILE"
-        echo "Old service file removed: $OLD_SERVICE_FILE"
+    if [ -f "$USER_SYSTEMD_DIR/$OLD_SERVICE_FILE" ]; then
+        systemctl --user stop "$OLD_SERVICE_FILE"
+        systemctl --user disable "$OLD_SERVICE_FILE"
+        rm -f "$USER_SYSTEMD_DIR/$OLD_SERVICE_FILE"
+        echo "Old service file removed from user systemd directory: $OLD_SERVICE_FILE"
     fi
 }
 
