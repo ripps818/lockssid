@@ -11,6 +11,16 @@ if [ -z "$SSID" ]; then
     exit 1
 fi
 
+# Get the wifi card's device name
+DEVICE_NAME=$(iw dev | grep Interface | awk '{print $2}')
+
+if [ -z "$DEVICE_NAME" ]; then
+    log_message "No wireless device found. Exiting."
+    exit 1
+fi
+# Turn off power saving mode
+iw dev "$DEVICE_NAME" set power_save off
+
 # Locking logic
 log_message "Locking Wi-Fi for SSID: $SSID"
 bssid=$(get_current_bssid)
