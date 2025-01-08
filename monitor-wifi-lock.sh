@@ -33,6 +33,8 @@ check_running_programs() {
 monitor_wifi() {
     local current_ssid
     local is_locked
+    local was_locked=0
+    local last_programs_running=0
 
     while true; do
         # Get current SSID
@@ -43,22 +45,31 @@ monitor_wifi() {
 
         # Check if any monitored programs are running
         if check_running_programs; then
-            # If a monitored program is running and Wi-Fi is unlocked, lock it
+            programs_running=1
+        else
+            programs_running=0
+        fi
+
+        # Lock or unlock Wi-Fi based on the state of monitored programs
+        if [ "$programs_running" -eq 1 ] && [ "$last_programs_running" -eq 0 ]; then
             if [ "$is_locked" -eq 0 ]; then
                 log_message "Locking Wi-Fi for SSID: $current_ssid"
                 bash $lock_wifi
+                was_locked=1
             else
                 log_message "Wi-Fi is already locked for SSID: $current_ssid"
             fi
-        else
-            # If no programs are running and Wi-Fi is locked, unlock it
+        elif [ "$programs_running" -eq 0 ] && [ "$last_programs_running" -eq 1 ]; then
             if [ "$is_locked" -eq 1 ]; then
                 log_message "Unlocking Wi-Fi for SSID: $current_ssid"
                 bash $unlock_wifi
+                was_locked=0
             else
-                log_message "No monitored programs are running. Wi-Fi remains unlocked."
+                log_message "Wi-Fi is already unlocked for SSID: $current_ssid"
             fi
         fi
+
+        last_programs_running=$programs_running
 
         # Sleep for the defined scan interval
         sleep "$scan_interval"
