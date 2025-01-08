@@ -36,7 +36,6 @@ bash $unlock_wifi
 monitor_wifi() {
     local current_ssid
     local is_locked
-    local was_locked=0
     local last_programs_running=0
 
     while true; do
@@ -44,7 +43,7 @@ monitor_wifi() {
         current_ssid=$(nmcli -t -f ACTIVE,SSID dev wifi | grep '^yes:' | cut -d':' -f2)
 
         # Check if Wi-Fi is locked
-        is_locked=$(nmcli -t -f 802-11-wireless.bssid con show "$current_ssid" | grep -c '802-11-wireless.bssid')
+        is_locked=$(nmcli -g 802-11-wireless.bssid con show "$current_ssid" | sed 's/\\:/:/g')
 
         # Check if any monitored programs are running
         if check_running_programs; then
@@ -55,18 +54,16 @@ monitor_wifi() {
 
         # Lock or unlock Wi-Fi based on the state of monitored programs
         if [ "$programs_running" -eq 1 ] && [ "$last_programs_running" -eq 0 ]; then
-            if [ "$is_locked" -eq 0 ]; then
+            if [ -z "$is_locked" ]; then
                 log_message "Locking Wi-Fi for SSID: $current_ssid"
                 bash $lock_wifi
-                was_locked=1
             else
                 log_message "Wi-Fi is already locked for SSID: $current_ssid"
             fi
         elif [ "$programs_running" -eq 0 ] && [ "$last_programs_running" -eq 1 ]; then
-            if [ "$is_locked" -eq 1 ]; then
+            if [ -n "$is_locked" ]; then
                 log_message "Unlocking Wi-Fi for SSID: $current_ssid"
                 bash $unlock_wifi
-                was_locked=0
             else
                 log_message "Wi-Fi is already unlocked for SSID: $current_ssid"
             fi
