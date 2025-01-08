@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Load utility functions
-source "$HOME/.local/share/LockSSID/utils.sh"
+source "/etc/lockssid/utils.sh"
 
 # Get the current SSID
 SSID=$(get_current_ssid)
@@ -18,8 +18,6 @@ if [ -z "$DEVICE_NAME" ]; then
     log_message "No wireless device found. Exiting."
     exit 1
 fi
-# Turn off power saving mode
-iw dev "$DEVICE_NAME" set power_save off
 
 # Locking logic
 log_message "Locking Wi-Fi for SSID: $SSID"
@@ -31,6 +29,12 @@ if [ -n "$bssid" ]; then
 else
     log_message "Failed to retrieve BSSID for SSID: $SSID"
 fi
+
+# Prevent NetworkManager from scanning for other networks
+nmcli dev set "$DEVICE_NAME" managed no
+
+# Turn off power saving mode
+iw dev "$DEVICE_NAME" set power_save off
 
 # Optionally disconnect and reconnect
 nmcli device disconnect "$SSID"
