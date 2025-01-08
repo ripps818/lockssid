@@ -1,10 +1,13 @@
 #!/bin/bash
 
-# Load utility functions
-source "/etc/lockssid/utils.sh"
+# Log message function
+log_message() {
+    local message="$1"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $message" >> /var/log/lockssid.log
+}
 
 # Get the current SSID
-SSID=$(get_current_ssid)
+SSID=$(nmcli -t -f ACTIVE,SSID dev wifi | grep '^yes:' | cut -d':' -f2)
 
 if [ -z "$SSID" ]; then
     log_message "No active Wi-Fi connection found. Exiting."
@@ -21,7 +24,7 @@ fi
 
 # Locking logic
 log_message "Locking Wi-Fi for SSID: $SSID"
-bssid=$(get_current_bssid)
+bssid=$(nmcli -t -f ACTIVE,BSSID dev wifi | grep '^yes:' | cut -d':' -f2)
 
 if [ -n "$bssid" ]; then
     nmcli con mod "$SSID" 802-11-wireless.bssid "$bssid"
@@ -37,5 +40,5 @@ nmcli dev set "$DEVICE_NAME" managed no
 iw dev "$DEVICE_NAME" set power_save off
 
 # Optionally disconnect and reconnect
-nmcli device disconnect "$SSID"
-nmcli device connect "$SSID"
+nmcli device disconnect "$DEVICE_NAME"
+nmcli device connect "$DEVICE_NAME"
