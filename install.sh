@@ -52,13 +52,12 @@ install_lockssid() {
     fi
 
     # Install LockSSID scripts
-    sudo install -m 755 lock-wifi.sh unlock-wifi.sh monitor-wifi-lock.sh utils.sh "$INSTALL_DIR/"
+    sudo install -m 755 lock-wifi.sh unlock-wifi.sh monitor-wifi-lock.sh "$INSTALL_DIR/"
 
     # Ensure scripts have execute permissions
     sudo chmod +x "$INSTALL_DIR/lock-wifi.sh"
     sudo chmod +x "$INSTALL_DIR/unlock-wifi.sh"
     sudo chmod +x "$INSTALL_DIR/monitor-wifi-lock.sh"
-    sudo chmod +x "$INSTALL_DIR/utils.sh"
 
     # Install the systemd service file
     sudo install -m 644 "$SERVICE_FILE" "$SYSTEMD_DIR/"
