@@ -3,7 +3,7 @@ Description=Lock WiFi to specific SSIDs based on running programs
 
 [Service]
 Type=simple
-ExecStart=%h/.local/share/LockSSID/monitor-wifi-lock.sh
+ExecStart=/etc/lockssid/monitor-wifi-lock.sh
 Restart=on-failure
 
 [Install]
