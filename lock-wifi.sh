@@ -35,10 +35,6 @@ else
     exit 1
 fi
 
-# Prevent NetworkManager from scanning for other networks
-nmcli dev set "$DEVICE_NAME" managed no
-log_message "Set NetworkManager to unmanaged for device: $DEVICE_NAME"
-
 # Turn off power saving mode using nmcli
 nmcli con mod "$SSID" 802-11-wireless.powersave 2
 log_message "Turned off power saving mode for SSID: $SSID"
